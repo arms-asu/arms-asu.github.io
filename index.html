@@ -300,13 +300,13 @@ function strokeSeg(x0, y0, x1, y1, r, col){
   // erase: continuous wide line through the black cover
   cover.globalCompositeOperation = 'destination-out';
   cover.strokeStyle = 'rgba(0,0,0,1)';
-  cover.lineWidth = r*2.05;
+  cover.lineWidth = r*2.7;
   cover.beginPath(); cover.moveTo(x0,y0); cover.lineTo(x1,y1); cover.stroke();
   cover.globalCompositeOperation = 'source-over';
   // paint: bold base stroke
-  paint.globalAlpha = 0.97;
+  paint.globalAlpha = 0.92;
   paint.strokeStyle = col.base;
-  paint.lineWidth = r*1.5;
+  paint.lineWidth = r*1.35;
   paint.beginPath(); paint.moveTo(x0,y0); paint.lineTo(x1,y1); paint.stroke();
   // texture: two thinner offset passes in lighter/darker orange
   const dx = x1-x0, dy = y1-y0, len = Math.hypot(dx,dy)||1;
