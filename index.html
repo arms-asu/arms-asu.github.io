@@ -20,6 +20,13 @@
   img{display:block;max-width:100%}
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
 
+  /* ---------- fx layers ---------- */
+  #embers{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+  #trail{position:fixed;inset:0;width:100%;height:100%;z-index:60;pointer-events:none}
+  #cursorGlow{position:fixed;left:0;top:0;width:340px;height:340px;margin:-170px 0 0 -170px;border-radius:50%;pointer-events:none;z-index:1;
+    background:radial-gradient(circle,rgba(245,128,37,.14) 0%,rgba(245,128,37,.05) 42%,transparent 68%);mix-blend-mode:screen;opacity:0;transition:opacity .5s}
+  main,nav,footer,header.hero{position:relative;z-index:2}
+
   /* ---------- nav ---------- */
   nav{position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(10,14,23,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid transparent;transition:border-color .3s}
   nav.scrolled{border-bottom-color:var(--line)}
@@ -35,14 +42,27 @@
   @media (max-width:640px){.navlinks a:not(.nav-cta){display:none}}
 
   /* ---------- hero ---------- */
-  .hero{position:relative;padding:180px 0 120px;text-align:center;overflow:hidden}
-  .hero::before{content:"";position:absolute;inset:0;background:
-    radial-gradient(720px 420px at 50% -140px, rgba(245,128,37,.16), transparent 68%),
-    radial-gradient(560px 380px at 82% 60px, rgba(127,176,232,.08), transparent 70%);pointer-events:none}
+  .hero{position:relative;text-align:center;overflow:hidden}
+
+  /* strokes stage: black canvas, orange brush strokes reveal the logo */
+  .stage{position:relative;height:min(66vh,580px);min-height:400px;background:#04060b;cursor:crosshair;touch-action:none;overflow:hidden}
+  .stage-reveal{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;
+    background:radial-gradient(620px 380px at 50% 46%, rgba(245,128,37,.16), transparent 70%),#04060b}
+  .stage-reveal img{width:min(290px,58vw);border-radius:26px;box-shadow:0 24px 70px rgba(0,0,0,.55),0 0 90px rgba(245,128,37,.28),0 0 0 1px rgba(255,255,255,.05)}
+  .stage-reveal .word{font-size:clamp(.8rem,2vw,.95rem);font-weight:600;letter-spacing:.34em;text-transform:uppercase;color:var(--muted)}
+  .stage-reveal .word b{color:var(--orange);font-weight:600}
+  .stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .stage-hint{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);display:flex;align-items:center;gap:9px;
+    font-size:.82rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:rgba(245,247,250,.55);
+    padding:9px 18px;border-radius:999px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.03);
+    transition:opacity .6s;pointer-events:none;animation:hintpulse 2.6s ease-in-out infinite}
+  .stage-hint svg{width:15px;height:15px;stroke:rgba(245,128,37,.9);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .stage-hint.gone{opacity:0}
+  @keyframes hintpulse{0%,100%{opacity:.55}50%{opacity:1}}
+
   .hero .glow{position:absolute;left:50%;top:-160px;width:760px;height:760px;transform:translateX(-50%);background:radial-gradient(circle,rgba(245,128,37,.09) 0%,transparent 62%);animation:breathe 9s ease-in-out infinite;pointer-events:none}
   @keyframes breathe{0%,100%{opacity:.7;transform:translateX(-50%) scale(1)}50%{opacity:1;transform:translateX(-50%) scale(1.06)}}
-  .hero-inner{position:relative}
-  .hero img.logo{width:132px;height:132px;object-fit:cover;border-radius:30px;margin:0 auto 36px;box-shadow:0 20px 60px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.06)}
+  .hero-inner{position:relative;padding:84px 0 118px}
   .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--orange);background:var(--orange-soft);border:1px solid rgba(245,128,37,.25);padding:7px 16px;border-radius:999px;margin-bottom:26px}
   .hero h1{font-size:clamp(2.4rem,6.4vw,4.2rem);font-weight:700;letter-spacing:-.03em;line-height:1.06;max-width:820px;margin:0 auto}
   .hero h1 span{background:linear-gradient(100deg,var(--orange),#ffb35c);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
@@ -66,7 +86,14 @@
   .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s cubic-bezier(.22,.61,.36,1),transform .7s cubic-bezier(.22,.61,.36,1)}
   .reveal.in{opacity:1;transform:none}
   .reveal.d1{transition-delay:.08s}.reveal.d2{transition-delay:.16s}.reveal.d3{transition-delay:.24s}
-  @media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}.hero .glow{animation:none}html{scroll-behavior:auto}}
+  @media (prefers-reduced-motion:reduce){
+    .reveal{opacity:1;transform:none;transition:none}
+    .hero .glow{animation:none}
+    html{scroll-behavior:auto}
+    .stage{cursor:default}
+    .stage-hint{animation:none}
+    #embers,#trail,#cursorGlow{display:none}
+  }
 
   /* ---------- about ---------- */
   .about-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:center}
@@ -103,6 +130,10 @@
 </head>
 <body>
 
+<canvas id="embers" aria-hidden="true"></canvas>
+<canvas id="trail" aria-hidden="true"></canvas>
+<div id="cursorGlow" aria-hidden="true"></div>
+
 <nav id="nav">
   <div class="wrap">
     <a class="brand" href="#top"><img src="arms-logo.jpg" alt="ARMS logo">ARMS<em>@ASU</em></a>
@@ -116,9 +147,20 @@
 </nav>
 
 <header class="hero" id="top">
+  <div class="stage" id="stage" role="img" aria-label="Interactive canvas: drag to paint orange strokes and reveal the ARMS logo">
+    <div class="stage-reveal">
+      <img src="arms-logo.jpg" alt="">
+      <div class="word">Advanced Robotics <b>&amp;</b> Manufacturing Systems</div>
+    </div>
+    <canvas id="paintCv"></canvas>
+    <canvas id="coverCv"></canvas>
+    <div class="stage-hint" id="hint">
+      <svg viewBox="0 0 24 24"><path d="M9 11.5V6a1.5 1.5 0 0 1 3 0v5m0-2a1.5 1.5 0 0 1 3 0v2m0-1a1.5 1.5 0 0 1 3 0v3c0 3.5-2.5 6-6 6s-5-1.6-6.4-4.8L4 11.6c-.5-1.2 1-2.3 2-1.3l1.5 1.7"/></svg>
+      Drag to reveal
+    </div>
+  </div>
   <div class="glow"></div>
   <div class="wrap hero-inner">
-    <img class="logo reveal in" src="arms-logo.jpg" alt="ARMS — Advanced Robotics &amp; Manufacturing Systems">
     <div class="eyebrow reveal in">Arizona State University · Polytechnic</div>
     <h1 class="reveal in">Advanced Robotics &amp;<br><span>Manufacturing Systems</span></h1>
     <p class="lede reveal in">We design, build, and program real machines — and teach the skills to do it, from first solder joint to full competition robot.</p>
@@ -132,6 +174,7 @@
   </div>
 </header>
 
+<main>
 <section id="about">
   <div class="wrap about-grid">
     <div class="about-copy reveal">
@@ -157,12 +200,12 @@
     </div>
     <div class="cards">
       <div class="card reveal">
-        <div class="icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.23.6.83 1 1.51 1H21a2 2 0 1 1 0 4h-.09c-.68 0-1.28.4-1.51 1z"/></svg></div>
+        <div class="icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.23.6.83 1 1.51 1H21a2 2 0 1 1 0 4h-.09c-.68 0-1.28.4-1.51 1z"/></svg></div>
         <h3>Build</h3>
         <p>Robot arms, mobile bases, electronics, CAD, machining and fabrication — real hardware, designed and assembled by members.</p>
       </div>
       <div class="card reveal d1">
-        <div class="icon"><svg viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v6a5 5 0 0 1-10 0V4z"/><path d="M7 6H4a2 2 0 0 0 0 4h3M17 6h3a2 2 0 0 1 0 4h-3"/></svg></div>
+        <div class="icon"><svg viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v6a5 5 0 0 1-10 0V4z"/><path d="M7 6H4a2 2 0 0 0 0 4h3M17 6h3a2 2 0 0 1 0 4h-3M7 6H4a2 2 0 0 0 0 4h3"/></svg></div>
         <h3>Compete</h3>
         <p>Intercollegiate robotics competitions and hackathons. Design reviews, crunch weeks, and the walk onto the competition floor.</p>
       </div>
@@ -199,6 +242,7 @@
     </div>
   </div>
 </section>
+</main>
 
 <footer>
   <div class="wrap">
@@ -208,12 +252,239 @@
 </footer>
 
 <script>
-  // reveal on scroll
-  const io = new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{threshold:.12});
-  document.querySelectorAll('.reveal:not(.in)').forEach(el=>io.observe(el));
-  // nav border after scroll
-  const nav=document.getElementById('nav');
-  addEventListener('scroll',()=>{nav.classList.toggle('scrolled',scrollY>24);},{passive:true});
+(function(){
+"use strict";
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const finePointer = matchMedia('(pointer: fine)').matches;
+const DPR = Math.min(devicePixelRatio || 1, 2);
+
+/* ============ strokes stage: scratch black, paint orange, reveal logo ============ */
+const stage = document.getElementById('stage');
+const coverCv = document.getElementById('coverCv');
+const paintCv = document.getElementById('paintCv');
+const hint = document.getElementById('hint');
+const cover = coverCv.getContext('2d');
+const paint = paintCv.getContext('2d');
+const ORANGES = ['#f58025','#ff8f3d','#ff9a3d','#ffb35c','#e56f14'];
+
+function sizeStage(){
+  const w = stage.clientWidth, h = stage.clientHeight;
+  [coverCv, paintCv].forEach(cv=>{ cv.width = w*DPR; cv.height = h*DPR; });
+  cover.setTransform(DPR,0,0,DPR,0,0);
+  paint.setTransform(DPR,0,0,DPR,0,0);
+  paint.lineCap = cover.lineCap = 'round';
+  paint.lineJoin = cover.lineJoin = 'round';
+  // black cover with a subtle brushed texture
+  cover.globalCompositeOperation = 'source-over';
+  cover.fillStyle = '#04060b';
+  cover.fillRect(0,0,w,h);
+  cover.fillStyle = 'rgba(255,255,255,.014)';
+  for(let i=0;i<40;i++){
+    const y = Math.random()*h;
+    cover.fillRect(0, y, w, 1+Math.random()*2);
+  }
+}
+sizeStage();
+
+function dab(ctx, x, y, r, color, alpha){
+  ctx.globalAlpha = alpha;
+  if(color) ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, 6.2832);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+}
+
+// one brush segment: erase cover (slightly wider) + paint orange (slightly narrower)
+function strokeSeg(x0, y0, x1, y1, r){
+  const dx = x1-x0, dy = y1-y0;
+  const dist = Math.hypot(dx, dy);
+  const steps = Math.max(1, Math.ceil(dist/(r*0.32)));
+  cover.globalCompositeOperation = 'destination-out';
+  for(let i=0;i<=steps;i++){
+    const t = i/steps;
+    const x = x0+dx*t, y = y0+dy*t;
+    // textured edge: main dab + two jittered smaller dabs
+    dab(cover, x, y, r*(0.92+Math.random()*0.14), null, 0.9);
+    dab(cover, x+(Math.random()-0.5)*r*0.9, y+(Math.random()-0.5)*r*0.9, r*0.55, null, 0.7);
+    dab(paint, x+(Math.random()-0.5)*r*0.25, y+(Math.random()-0.5)*r*0.25, r*(0.6+Math.random()*0.16), ORANGES[(Math.random()*ORANGES.length)|0], 0.85);
+  }
+  cover.globalCompositeOperation = 'source-over';
+}
+
+function splatter(x, y, r){
+  cover.globalCompositeOperation = 'destination-out';
+  const n = 6+(Math.random()*8|0);
+  for(let i=0;i<n;i++){
+    const a = Math.random()*6.2832, d = r*(1.1+Math.random()*2.2);
+    const px = x+Math.cos(a)*d, py = y+Math.sin(a)*d;
+    const pr = 1+Math.random()*r*0.22;
+    dab(cover, px, py, pr*1.15, null, 0.9);
+    dab(paint, px, py, pr, ORANGES[(Math.random()*ORANGES.length)|0], 0.8);
+  }
+  cover.globalCompositeOperation = 'source-over';
+}
+
+/* pointer-driven strokes */
+let drawing = false, last = null, interacted = false;
+function pos(e){
+  const rect = stage.getBoundingClientRect();
+  return { x: e.clientX-rect.left, y: e.clientY-rect.top };
+}
+function brushRadius(){
+  return Math.max(14, Math.min(34, stage.clientWidth*0.028));
+}
+stage.addEventListener('pointerdown', e=>{
+  drawing = true;
+  stage.setPointerCapture(e.pointerId);
+  last = pos(e);
+  if(!interacted){ interacted = true; hint.classList.add('gone'); }
+  const r = brushRadius();
+  strokeSeg(last.x, last.y, last.x+0.1, last.y+0.1, r);
+  e.preventDefault();
+});
+stage.addEventListener('pointermove', e=>{
+  if(!drawing || !last) return;
+  const p = pos(e);
+  const speed = Math.hypot(p.x-last.x, p.y-last.y);
+  const r = Math.max(9, brushRadius() - Math.min(14, speed*0.12));
+  strokeSeg(last.x, last.y, p.x, p.y, r);
+  last = p;
+});
+function endStroke(e){
+  if(drawing && last) splatter(last.x, last.y, brushRadius()*0.8);
+  drawing = false; last = null;
+}
+stage.addEventListener('pointerup', endStroke);
+stage.addEventListener('pointercancel', endStroke);
+
+/* freestyle auto-strokes on load (skipped for reduced motion) */
+function cubic(p0,p1,p2,p3,t){
+  const u = 1-t;
+  return {
+    x: u*u*u*p0.x + 3*u*u*t*p1.x + 3*u*t*t*p2.x + t*t*t*p3.x,
+    y: u*u*u*p0.y + 3*u*u*t*p1.y + 3*u*t*t*p2.y + t*t*t*p3.y
+  };
+}
+function autoStroke(){
+  const w = stage.clientWidth, h = stage.clientHeight;
+  const paths = [
+    [{x:-0.06*w,y:0.78*h},{x:0.30*w,y:0.30*h},{x:0.52*w,y:0.88*h},{x:0.80*w,y:0.30*h}],
+    [{x:0.16*w,y:0.16*h},{x:0.44*w,y:0.05*h},{x:0.74*w,y:0.14*h},{x:1.04*w,y:0.62*h}],
+    [{x:0.06*w,y:0.52*h},{x:0.36*w,y:0.66*h},{x:0.60*w,y:0.38*h},{x:0.94*w,y:0.82*h}]
+  ];
+  const DUR = 1150, GAP = 420;
+  paths.forEach((pts, idx)=>{
+    setTimeout(()=>{
+      const start = performance.now();
+      let prev = cubic(...pts, 0);
+      (function frame(now){
+        const t = Math.min(1, (now-start)/DUR);
+        const ease = t<0.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2;
+        const cur = cubic(...pts, ease);
+        strokeSeg(prev.x, prev.y, cur.x, cur.y, brushRadius()*1.06);
+        prev = cur;
+        if(t < 1) requestAnimationFrame(frame);
+        else splatter(cur.x, cur.y, brushRadius());
+      })(start);
+    }, 500 + idx*GAP);
+  });
+}
+
+let resizeT;
+addEventListener('resize', ()=>{ clearTimeout(resizeT); resizeT = setTimeout(sizeStage, 180); });
+
+/* reduced motion: no cover, no auto-strokes, show the logo directly */
+if(reduced){
+  coverCv.style.display = 'none';
+  hint.style.display = 'none';
+}else{
+  autoStroke();
+  setTimeout(()=>hint.classList.add('gone'), 9000);
+}
+
+/* ============ ambient ember particles (page background) ============ */
+const embersCv = document.getElementById('embers');
+const ectx = embersCv.getContext('2d');
+let embers = [];
+function sizeEmbers(){
+  embersCv.width = innerWidth*DPR; embersCv.height = innerHeight*DPR;
+  ectx.setTransform(DPR,0,0,DPR,0,0);
+  const n = Math.min(46, Math.round(innerWidth*innerHeight/34000));
+  embers = Array.from({length:n}, ()=>({
+    x: Math.random()*innerWidth, y: Math.random()*innerHeight,
+    r: 0.7+Math.random()*1.9, vy: -(0.07+Math.random()*0.22), vx: (Math.random()-0.5)*0.14,
+    a: 0.05+Math.random()*0.22, ph: Math.random()*6.2832, ps: 0.004+Math.random()*0.012
+  }));
+}
+
+/* ============ cursor glow + trail (fine pointers only) ============ */
+const trailCv = document.getElementById('trail');
+const tctx = trailCv.getContext('2d');
+const glowEl = document.getElementById('cursorGlow');
+let mouse = {x: innerWidth/2, y: innerHeight/2}, glow = {x: innerWidth/2, y: innerHeight/2}, trailPts = [];
+function sizeTrail(){ trailCv.width = innerWidth*DPR; trailCv.height = innerHeight*DPR; tctx.setTransform(DPR,0,0,DPR,0,0); }
+
+if(!reduced){
+  sizeEmbers(); sizeTrail();
+  addEventListener('resize', ()=>{ sizeEmbers(); sizeTrail(); });
+
+  if(finePointer){
+    addEventListener('pointermove', e=>{
+      mouse.x = e.clientX; mouse.y = e.clientY;
+      glowEl.style.opacity = '1';
+      trailPts.push({x:e.clientX, y:e.clientY, life:1});
+      if(trailPts.length > 64) trailPts.shift();
+    }, {passive:true});
+    document.addEventListener('pointerleave', ()=>{ glowEl.style.opacity = '0'; });
+  }
+
+  let fxRunning = true;
+  document.addEventListener('visibilitychange', ()=>{
+    fxRunning = !document.hidden;
+    if(fxRunning) requestAnimationFrame(fxTick);
+  });
+
+  function fxTick(){
+    if(!fxRunning) return;
+    // embers
+    ectx.clearRect(0,0,innerWidth,innerHeight);
+    for(const p of embers){
+      p.x += p.vx; p.y += p.vy; p.ph += p.ps;
+      if(p.y < -6){ p.y = innerHeight+6; p.x = Math.random()*innerWidth; }
+      if(p.x < -6) p.x = innerWidth+6; else if(p.x > innerWidth+6) p.x = -6;
+      const tw = p.a * (0.6 + 0.4*Math.sin(p.ph));
+      ectx.globalAlpha = tw;
+      ectx.fillStyle = '#f58025';
+      ectx.beginPath(); ectx.arc(p.x, p.y, p.r, 0, 6.2832); ectx.fill();
+    }
+    ectx.globalAlpha = 1;
+    // cursor glow (lerped follow)
+    glow.x += (mouse.x-glow.x)*0.12; glow.y += (mouse.y-glow.y)*0.12;
+    glowEl.style.transform = 'translate('+glow.x+'px,'+glow.y+'px)';
+    // trail
+    tctx.clearRect(0,0,innerWidth,innerHeight);
+    for(let i=0;i<trailPts.length;i++){
+      const pt = trailPts[i];
+      pt.life -= 0.028;
+      if(pt.life <= 0){ trailPts.splice(i--,1); continue; }
+      tctx.globalAlpha = pt.life*0.5;
+      tctx.fillStyle = '#ffb35c';
+      tctx.beginPath(); tctx.arc(pt.x, pt.y, 1.2+pt.life*2.4, 0, 6.2832); tctx.fill();
+    }
+    tctx.globalAlpha = 1;
+    requestAnimationFrame(fxTick);
+  }
+  requestAnimationFrame(fxTick);
+}
+
+/* ============ reveal on scroll ============ */
+const io = new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{threshold:.12});
+document.querySelectorAll('.reveal:not(.in)').forEach(el=>io.observe(el));
+/* nav border after scroll */
+const nav=document.getElementById('nav');
+addEventListener('scroll',()=>{nav.classList.toggle('scrolled',scrollY>24);},{passive:true});
+})();
 </script>
 
 </body>
