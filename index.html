@@ -7,7 +7,7 @@
 <meta name="description" content="ARMS is Arizona State University's robotics and manufacturing club. Build, compete, teach.">
 <style>
   :root{
-    --bg:#0a0e17; --bg2:#0d1220; --card:#111827; --line:#1e2a3f;
+    --bg:#000000; --bg2:#0a0a0a; --card:#141416; --line:#26262a;
     --orange:#f58025; --orange-soft:rgba(245,128,37,.12);
     --text:#f5f7fa; --muted:#98a2b6; --faint:#6b768c;
     --maxw:1120px;
@@ -29,7 +29,7 @@
   main,nav,footer,header.hero{position:relative;z-index:2}
 
   /* ---------- nav ---------- */
-  nav{position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(10,14,23,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid transparent;transition:border-color .3s}
+  nav{position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(0,0,0,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid transparent;transition:border-color .3s}
   nav.scrolled{border-bottom-color:var(--line)}
   nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
   .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:.95rem;letter-spacing:.04em}
@@ -46,9 +46,9 @@
   .hero{position:relative;text-align:center;overflow:hidden}
 
   /* strokes stage: black canvas, orange brush strokes reveal the logo */
-  .stage{position:relative;height:min(66vh,580px);min-height:400px;background:#04060b;cursor:crosshair;touch-action:none;overflow:hidden}
+  .stage{position:relative;height:min(66vh,580px);min-height:400px;background:#000000;cursor:crosshair;touch-action:none;overflow:hidden}
   .stage-reveal{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;
-    background:radial-gradient(620px 380px at 50% 46%, rgba(245,128,37,.16), transparent 70%),#04060b}
+    background:radial-gradient(620px 380px at 50% 46%, rgba(245,128,37,.16), transparent 70%),#000000}
   .stage-reveal img{width:min(290px,58vw);border-radius:26px;box-shadow:0 24px 70px rgba(0,0,0,.55),0 0 90px rgba(245,128,37,.28),0 0 0 1px rgba(255,255,255,.05)}
   .stage-reveal .word{font-size:clamp(.8rem,2vw,.95rem);font-weight:600;letter-spacing:.34em;text-transform:uppercase;color:var(--muted)}
   .stage-reveal .word b{color:var(--orange);font-weight:600}
@@ -109,7 +109,7 @@
   .fact .v a{color:var(--orange)}
 
   /* ---------- pillars ---------- */
-  .pillars{background:rgba(13,18,32,.62);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .pillars{background:rgba(255,255,255,.035);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
   .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
   @media (max-width:820px){.cards{grid-template-columns:1fr}}
   .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:34px 30px;transition:transform .25s ease,border-color .25s ease}
@@ -290,7 +290,7 @@ function sizeStage(){
   paint.lineJoin = cover.lineJoin = 'round';
   // black cover with a subtle brushed texture
   cover.globalCompositeOperation = 'source-over';
-  cover.fillStyle = '#04060b';
+  cover.fillStyle = '#000000';
   cover.fillRect(0,0,w,h);
   cover.fillStyle = 'rgba(255,255,255,.014)';
   for(let i=0;i<40;i++){
