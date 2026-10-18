@@ -21,6 +21,7 @@
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
 
   /* ---------- fx layers ---------- */
+  #field{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
   #embers{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
   #trail{position:fixed;inset:0;width:100%;height:100%;z-index:60;pointer-events:none}
   #cursorGlow{position:fixed;left:0;top:0;width:340px;height:340px;margin:-170px 0 0 -170px;border-radius:50%;pointer-events:none;z-index:1;
@@ -92,7 +93,7 @@
     html{scroll-behavior:auto}
     .stage{cursor:default}
     .stage-hint{animation:none}
-    #embers,#trail,#cursorGlow{display:none}
+    #field,#embers,#trail,#cursorGlow{display:none}
   }
 
   /* ---------- about ---------- */
@@ -108,7 +109,7 @@
   .fact .v a{color:var(--orange)}
 
   /* ---------- pillars ---------- */
-  .pillars{background:var(--bg2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .pillars{background:rgba(13,18,32,.62);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
   .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
   @media (max-width:820px){.cards{grid-template-columns:1fr}}
   .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:34px 30px;transition:transform .25s ease,border-color .25s ease}
@@ -130,6 +131,7 @@
 </head>
 <body>
 
+<canvas id="field" aria-hidden="true"></canvas>
 <canvas id="embers" aria-hidden="true"></canvas>
 <canvas id="trail" aria-hidden="true"></canvas>
 <div id="cursorGlow" aria-hidden="true"></div>
@@ -482,9 +484,65 @@ const glowEl = document.getElementById('cursorGlow');
 let mouse = {x: innerWidth/2, y: innerHeight/2}, glow = {x: innerWidth/2, y: innerHeight/2}, trailPts = [];
 function sizeTrail(){ trailCv.width = innerWidth*DPR; trailCv.height = innerHeight*DPR; tctx.setTransform(DPR,0,0,DPR,0,0); }
 
+/* ============ interactive dot field (portfolio-style page background) ============ */
+const fieldCv = document.getElementById('field');
+const fctx = fieldCv.getContext('2d');
+let dots = [], ripples = [], fmouse = {x:0, y:0, on:false}, glowK = 0;
+function sizeField(){
+  fieldCv.width = innerWidth*DPR; fieldCv.height = innerHeight*DPR;
+  fctx.setTransform(DPR,0,0,DPR,0,0);
+  // keep dot count bounded on large screens
+  const gap = Math.max(30, Math.sqrt(innerWidth*innerHeight/2400));
+  dots = [];
+  for(let x=gap/2; x<innerWidth; x+=gap)
+    for(let y=gap/2; y<innerHeight; y+=gap)
+      dots.push({x:x, y:y, ph:Math.random()*6.2832});
+}
+function drawField(now){
+  fctx.clearRect(0, 0, innerWidth, innerHeight);
+  glowK += ((fmouse.on?1:0)-glowK)*0.14;
+  ripples = ripples.filter(r=> now-r.t < 2400);
+  const PROX = 170;
+  for(const d of dots){
+    let boost = 0.10 + 0.05*Math.sin(now*0.0011 + d.ph);
+    if(glowK > 0.02){
+      const dist = Math.hypot(d.x-fmouse.x, d.y-fmouse.y);
+      if(dist < PROX) boost += (1-dist/PROX)*0.85*glowK;
+    }
+    for(const r of ripples){
+      const age = now-r.t;
+      const band = Math.abs(Math.hypot(d.x-r.x, d.y-r.y) - age*0.28);
+      if(band < 70) boost += (1-age/2400)*(1-band/70)*0.9;
+    }
+    if(boost <= 0.04) continue;
+    fctx.globalAlpha = Math.min(0.85, boost);
+    fctx.fillStyle = '#f58025';
+    fctx.beginPath(); fctx.arc(d.x, d.y, 1.1 + Math.min(2.6, boost*2.2), 0, 6.2832); fctx.fill();
+  }
+  fctx.globalAlpha = 1;
+  for(const r of ripples){
+    const age = now-r.t;
+    fctx.globalAlpha = (1-age/2400)*0.22;
+    fctx.strokeStyle = '#ffb35c';
+    fctx.lineWidth = 1.6;
+    fctx.beginPath(); fctx.arc(r.x, r.y, age*0.28, 0, 6.2832); fctx.stroke();
+  }
+  fctx.globalAlpha = 1;
+}
+
 if(!reduced){
-  sizeEmbers(); sizeTrail();
-  addEventListener('resize', ()=>{ sizeEmbers(); sizeTrail(); });
+  sizeEmbers(); sizeTrail(); sizeField();
+  addEventListener('resize', ()=>{ sizeEmbers(); sizeTrail(); sizeField(); });
+
+  addEventListener('pointermove', e=>{ fmouse.x = e.clientX; fmouse.y = e.clientY; fmouse.on = true; }, {passive:true});
+  addEventListener('pointerdown', e=>{
+    fmouse.x = e.clientX; fmouse.y = e.clientY; fmouse.on = true;
+    ripples.push({x:e.clientX, y:e.clientY, t:performance.now()});
+    if(ripples.length > 6) ripples.shift();
+  }, {passive:true});
+  addEventListener('pointerup', e=>{ if(e.pointerType !== 'mouse') fmouse.on = false; }, {passive:true});
+  addEventListener('pointercancel', e=>{ if(e.pointerType !== 'mouse') fmouse.on = false; }, {passive:true});
+  document.addEventListener('pointerleave', ()=>{ fmouse.on = false; });
 
   if(finePointer){
     addEventListener('pointermove', e=>{
@@ -504,6 +562,8 @@ if(!reduced){
 
   function fxTick(){
     if(!fxRunning) return;
+    // dot field
+    drawField(performance.now());
     // embers
     ectx.clearRect(0,0,innerWidth,innerHeight);
     for(const p of embers){
