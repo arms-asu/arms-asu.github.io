@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projects — ARMS @ ASU</title>
+<meta name="description" content="Projects at ARMS @ ASU: member builds, competition robots, and contract-style robotics projects with companies.">
+<style>
+  :root{
+    --bg:#000000; --bg2:#0a0a0a; --card:#141416; --line:#26262a;
+    --orange:#f58025; --orange-soft:rgba(245,128,37,.12);
+    --text:#f5f7fa; --muted:#98a2b6; --faint:#6b768c;
+    --maxw:1120px;
+    --font:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.6;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:hidden}
+  a{color:inherit;text-decoration:none}
+  img{display:block;max-width:100%}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+
+  /* ---------- fx layers ---------- */
+  #field{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+  #embers{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+  #trail{position:fixed;inset:0;width:100%;height:100%;z-index:60;pointer-events:none}
+  #cursorGlow{position:fixed;left:0;top:0;width:340px;height:340px;margin:-170px 0 0 -170px;border-radius:50%;pointer-events:none;z-index:1;
+    background:radial-gradient(circle,rgba(245,128,37,.10) 0%,transparent 62%);opacity:0;transition:opacity .4s}
+
+  /* ---------- nav ---------- */
+  nav{position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(0,0,0,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid transparent;transition:border-color .3s}
+  nav.scrolled{border-bottom-color:var(--line)}
+  nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:.95rem;letter-spacing:.04em}
+  .brand img{width:30px;height:30px;border-radius:8px}
+  .brand em{font-style:normal;color:var(--orange);margin-left:.38em}
+  .navlinks{display:flex;align-items:center;gap:28px;font-size:.9rem;color:var(--muted)}
+  .navlinks a{transition:color .2s}
+  .navlinks a:hover{color:var(--text)}
+  .navlinks a.active{color:var(--text)}
+  .nav-cta{padding:8px 18px;border-radius:8px;background:var(--orange);color:#0a0e17;font-weight:600;transition:background .2s}
+  .nav-cta:hover{background:#ff8f3d;color:#0a0e17}
+  @media (max-width:640px){.navlinks a:not(.nav-cta):not(.active){display:none}}
+
+  /* ---------- page hero ---------- */
+  .page-hero{position:relative;text-align:center;padding:170px 0 90px;overflow:hidden}
+  .page-hero .glow{position:absolute;left:50%;top:-160px;width:760px;height:760px;transform:translateX(-50%);background:radial-gradient(circle,rgba(245,128,37,.09) 0%,transparent 62%);animation:breathe 9s ease-in-out infinite;pointer-events:none}
+  @keyframes breathe{0%,100%{opacity:.7;transform:translateX(-50%) scale(1)}50%{opacity:1;transform:translateX(-50%) scale(1.06)}}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--orange);background:var(--orange-soft);border:1px solid rgba(245,128,37,.25);padding:7px 16px;border-radius:999px;margin-bottom:26px}
+  .page-hero h1{font-size:clamp(2.4rem,6.4vw,4.2rem);font-weight:700;letter-spacing:-.03em;line-height:1.06;max-width:820px;margin:0 auto}
+  .page-hero h1 span{background:linear-gradient(100deg,var(--orange),#ffb35c);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .page-hero p.lede{color:var(--muted);font-size:clamp(1.02rem,2.4vw,1.22rem);line-height:1.65;max-width:640px;margin:24px auto 0;font-weight:400}
+  .cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:40px}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;border-radius:10px;font-weight:600;font-size:.98rem;transition:transform .18s ease,box-shadow .18s ease,background .18s,border-color .18s;will-change:transform}
+  .btn-primary{background:var(--orange);color:#0a0e17;box-shadow:0 8px 30px rgba(245,128,37,.28)}
+  .btn-primary:hover{transform:translateY(-2px);background:#ff8f3d;box-shadow:0 12px 36px rgba(245,128,37,.38)}
+  .btn-ghost{border:1px solid var(--line);color:var(--text);background:rgba(255,255,255,.02)}
+  .btn-ghost:hover{transform:translateY(-2px);border-color:#33445f;background:rgba(255,255,255,.05)}
+  .btn svg{width:16px;height:16px}
+
+  /* ---------- generic sections ---------- */
+  section{padding:110px 0}
+  .sec-head{max-width:640px;margin-bottom:56px}
+  .sec-head.center{margin-left:auto;margin-right:auto;text-align:center}
+  .kicker{font-size:.78rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--orange);margin-bottom:14px}
+  h2{font-size:clamp(1.7rem,4vw,2.5rem);font-weight:700;letter-spacing:-.025em;line-height:1.15}
+  .sec-head p{color:var(--muted);margin-top:14px;font-size:1.05rem}
+
+  .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s cubic-bezier(.22,.61,.36,1),transform .7s cubic-bezier(.22,.61,.36,1)}
+  .reveal.in{opacity:1;transform:none}
+  .reveal.d1{transition-delay:.08s}.reveal.d2{transition-delay:.16s}.reveal.d3{transition-delay:.24s}
+  @media (prefers-reduced-motion:reduce){
+    .reveal{opacity:1;transform:none;transition:none}
+    .page-hero .glow{animation:none}
+    html{scroll-behavior:auto}
+    #field,#embers,#trail,#cursorGlow{display:none}
+  }
+
+  /* ---------- cards ---------- */
+  .pillars{background:rgba(255,255,255,.035);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  @media (max-width:820px){.cards{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:34px 30px;transition:transform .25s ease,border-color .25s ease}
+  .card:hover{transform:translateY(-5px);border-color:rgba(245,128,37,.4)}
+  .icon{width:46px;height:46px;border-radius:12px;background:var(--orange-soft);border:1px solid rgba(245,128,37,.22);display:flex;align-items:center;justify-content:center;margin-bottom:22px}
+  .icon svg{width:22px;height:22px;stroke:var(--orange);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .card h3{font-size:1.08rem;font-weight:600;letter-spacing:-.01em;margin-bottom:10px}
+  .card p{color:var(--muted);font-size:.95rem;line-height:1.65}
+
+  /* ---------- project status ---------- */
+  .tag{display:inline-block;font-size:.72rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--orange);background:var(--orange-soft);border:1px solid rgba(245,128,37,.25);padding:5px 12px;border-radius:999px;margin-bottom:16px}
+  .tag.soon{color:var(--muted);background:rgba(255,255,255,.04);border-color:var(--line)}
+  .wide{grid-column:1/-1}
+
+  /* ---------- industry ---------- */
+  .split{display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:center}
+  @media (max-width:820px){.split{grid-template-columns:1fr;gap:40px}}
+  .split-copy p{color:var(--muted);font-size:1.06rem;margin-top:18px}
+  .split-copy p b{color:var(--text);font-weight:600}
+  .steps{display:flex;flex-direction:column;gap:2px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:8px 26px}
+  .step{display:flex;gap:18px;align-items:baseline;padding:17px 0;border-bottom:1px solid var(--line)}
+  .step:last-child{border-bottom:none}
+  .step .n{color:var(--orange);font-size:.86rem;font-weight:700;white-space:nowrap;min-width:26px}
+  .step .t{color:var(--text);font-size:.95rem;font-weight:500}
+  .step .t span{display:block;color:var(--faint);font-size:.86rem;font-weight:400;margin-top:2px}
+
+  /* ---------- connect ---------- */
+  .connect{text-align:center;border-top:1px solid var(--line)}
+  .socials{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:36px}
+  footer{border-top:1px solid var(--line);padding:34px 0;color:var(--faint);font-size:.86rem}
+  footer .wrap{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+  footer a{color:var(--muted)}
+  footer a:hover{color:var(--orange)}
+</style>
+</head>
+<body>
+
+<canvas id="field" aria-hidden="true"></canvas>
+<canvas id="embers" aria-hidden="true"></canvas>
+<canvas id="trail" aria-hidden="true"></canvas>
+<div id="cursorGlow" aria-hidden="true"></div>
+
+<nav id="nav">
+  <div class="wrap">
+    <a class="brand" href="index.html"><img src="arms-logo.jpg" alt="ARMS logo">ARMS<em>@ASU</em></a>
+    <div class="navlinks">
+      <a href="index.html#about">About</a>
+      <a href="index.html#what">What we do</a>
+      <a class="active" href="projects.html">Projects</a>
+      <a href="index.html#connect">Connect</a>
+      <a class="nav-cta" href="index.html#connect">Apply</a>
+    </div>
+  </div>
+</nav>
+
+<header class="page-hero" id="top">
+  <div class="glow"></div>
+  <div class="wrap">
+    <div class="eyebrow reveal in">ARMS @ ASU</div>
+    <h1 class="reveal in">Built by members,<br><span>driven by real problems.</span></h1>
+    <p class="lede reveal in">Member builds, competition robots, and contract-style projects with companies — designed, machined, and programmed at ASU Polytechnic.</p>
+  </div>
+</header>
+
+<main>
+<section class="pillars" id="lanes">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="kicker">How we build</div>
+      <h2>Every project runs three lanes.</h2>
+      <p>Each build, whether it is a club robot or a company project, pulls from the same bench of skills.</p>
+    </div>
+    <div class="cards">
+      <div class="card reveal">
+        <div class="icon"><svg viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M2 4h20v13H2z"/><path d="M7 9l3 2-3 2M12 13h5"/></svg></div>
+        <h3>Software</h3>
+        <p>Robot control, perception, and autonomy code — ROS 2, embedded firmware, and the glue that makes hardware listen.</p>
+      </div>
+      <div class="card reveal d1">
+        <div class="icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.23.6.83 1 1.51 1H21a2 2 0 1 1 0 4h-.09c-.68 0-1.28.4-1.51 1z"/></svg></div>
+        <h3>Hardware</h3>
+        <p>Robot arms, mobile bases, and custom electronics — CAD, machining, and fabrication on campus research equipment.</p>
+      </div>
+      <div class="card reveal d2">
+        <div class="icon"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.3 7 12 12l8.7-5M12 22V12"/></svg></div>
+        <h3>Simulation</h3>
+        <p>Physics-accurate testing before anything is built — including NVIDIA Isaac Sim — so hardware time goes further.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="industry">
+  <div class="wrap split">
+    <div class="split-copy reveal">
+      <div class="kicker">Industry projects</div>
+      <h2>Contract-style projects with companies.</h2>
+      <p>We take on projects with companies the way capstone teams do: <b>you bring a real problem, and we work with you to build a genuine solution.</b> Our members work across robotics software, hardware, and simulation, with access to research equipment on campus.</p>
+      <p>Our first industry collaborations are in discussion now. This page will showcase each project as it lands.</p>
+      <div class="cta" style="justify-content:flex-start">
+        <a class="btn btn-primary" href="mailto:the.arms.robotics@gmail.com?subject=Project%20collaboration%20with%20ARMS%20%40%20ASU">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m2 7 10 6L22 7"/></svg>
+          Start a project with us
+        </a>
+      </div>
+    </div>
+    <div class="steps reveal d1">
+      <div class="step"><span class="n">01</span><span class="t">Bring the problem<span>A real robotics or manufacturing challenge from your team.</span></span></div>
+      <div class="step"><span class="n">02</span><span class="t">Scope it together<span>A short call to shape what a student team can genuinely deliver.</span></span></div>
+      <div class="step"><span class="n">03</span><span class="t">We build<span>Software, hardware, and simulation work on campus research equipment.</span></span></div>
+      <div class="step"><span class="n">04</span><span class="t">You get the output<span>A working solution, documented and handed over.</span></span></div>
+    </div>
+  </div>
+</section>
+
+<section class="pillars" id="builds">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="kicker">Club builds</div>
+      <h2>What members are making.</h2>
+      <p>Our first semester's build lineup is coming together now. Build logs and demos land on our Instagram and Discord as they happen.</p>
+    </div>
+    <div class="cards">
+      <div class="card wide reveal">
+        <div class="tag soon">Coming soon</div>
+        <h3>Member build showcase</h3>
+        <p>Individual project cards — with photos, specs, and the members behind each build — go up here as builds are completed this semester. Follow along in the meantime.</p>
+        <div class="cta" style="justify-content:flex-start;margin-top:24px">
+          <a class="btn btn-ghost" href="https://www.instagram.com/a.r.m.s._robotics" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".5" fill="currentColor"/></svg>
+            @a.r.m.s._robotics
+          </a>
+          <a class="btn btn-ghost" href="https://discord.gg/U6Zy9Nn3d" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.058a.082.082 0 0 0 .031.056 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 0 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.182 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+            Discord
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="connect" id="connect">
+  <div class="wrap">
+    <div class="sec-head center reveal">
+      <div class="kicker">Connect</div>
+      <h2>Come build with us.</h2>
+      <p>Apply on Sun Devil Central, hop into the Discord, or follow the builds. Everything lives on our Linktree.</p>
+    </div>
+    <div class="socials reveal d1">
+      <a class="btn btn-primary" href="https://sundevilcentral.eoss.asu.edu/ARMS/club_signup" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
+        Apply on Sun Devil Central
+      </a>
+      <a class="btn btn-ghost" href="https://linktr.ee/a.r.m.s._robotics" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        Linktree
+      </a>
+      <a class="btn btn-ghost" href="mailto:the.arms.robotics@gmail.com">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m2 7 10 6L22 7"/></svg>
+        Email us
+      </a>
+      <a class="btn btn-ghost" href="https://github.com/arms-asu" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56v-2.17c-3.2.7-3.87-1.37-3.87-1.37-.52-1.33-1.28-1.68-1.28-1.68-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.23-1.28-5.23-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.1 11.1 0 0 1 5.8 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.12 3.05.74.81 1.18 1.83 1.18 3.09 0 4.41-2.69 5.38-5.25 5.66.41.36.78 1.06.78 2.14v3.17c0 .31.21.68.8.56A10.52 10.52 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z"/></svg>
+        GitHub
+      </a>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>ARMS — Advanced Robotics &amp; Manufacturing Systems</span>
+    <span><a href="index.html">Home</a> · ASU Polytechnic · Mesa, AZ</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+"use strict";
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const finePointer = matchMedia('(pointer: fine)').matches;
+const DPR = Math.min(devicePixelRatio || 1, 2);
+
+/* ============ ambient ember particles (page background) ============ */
+const embersCv = document.getElementById('embers');
+const ectx = embersCv.getContext('2d');
+let embers = [];
+function sizeEmbers(){
+  embersCv.width = innerWidth*DPR; embersCv.height = innerHeight*DPR;
+  ectx.setTransform(DPR,0,0,DPR,0,0);
+  const n = Math.min(46, Math.round(innerWidth*innerHeight/34000));
+  embers = Array.from({length:n}, ()=>({
+    x: Math.random()*innerWidth, y: Math.random()*innerHeight,
+    r: 0.7+Math.random()*1.9, vy: -(0.07+Math.random()*0.22), vx: (Math.random()-0.5)*0.14,
+    a: 0.05+Math.random()*0.22, ph: Math.random()*6.2832, ps: 0.004+Math.random()*0.012
+  }));
+}
+
+/* ============ cursor glow + trail (fine pointers only) ============ */
+const trailCv = document.getElementById('trail');
+const tctx = trailCv.getContext('2d');
+const glowEl = document.getElementById('cursorGlow');
+let mouse = {x: innerWidth/2, y: innerHeight/2}, glow = {x: innerWidth/2, y: innerHeight/2}, trailPts = [];
+function sizeTrail(){ trailCv.width = innerWidth*DPR; trailCv.height = innerHeight*DPR; tctx.setTransform(DPR,0,0,DPR,0,0); }
+
+/* ============ interactive dot field (page background) ============ */
+const fieldCv = document.getElementById('field');
+const fctx = fieldCv.getContext('2d');
+let dots = [], ripples = [], fmouse = {x:0, y:0, on:false}, glowK = 0;
+function sizeField(){
+  fieldCv.width = innerWidth*DPR; fieldCv.height = innerHeight*DPR;
+  fctx.setTransform(DPR,0,0,DPR,0,0);
+  const gap = Math.max(30, Math.sqrt(innerWidth*innerHeight/2400));
+  dots = [];
+  for(let x=gap/2; x<innerWidth; x+=gap)
+    for(let y=gap/2; y<innerHeight; y+=gap)
+      dots.push({x:x, y:y, ph:Math.random()*6.2832});
+}
+function drawField(now){
+  fctx.clearRect(0, 0, innerWidth, innerHeight);
+  glowK += ((fmouse.on?1:0)-glowK)*0.14;
+  ripples = ripples.filter(r=> now-r.t < 2400);
+  const PROX = 170;
+  for(const d of dots){
+    let boost = 0.10 + 0.05*Math.sin(now*0.0011 + d.ph);
+    if(glowK > 0.02){
+      const dist = Math.hypot(d.x-fmouse.x, d.y-fmouse.y);
+      if(dist < PROX) boost += (1-dist/PROX)*0.85*glowK;
+    }
+    for(const r of ripples){
+      const age = now-r.t;
+      const band = Math.abs(Math.hypot(d.x-r.x, d.y-r.y) - age*0.28);
+      if(band < 70) boost += (1-age/2400)*(1-band/70)*0.9;
+    }
+    if(boost <= 0.04) continue;
+    fctx.globalAlpha = Math.min(0.85, boost);
+    fctx.fillStyle = '#f58025';
+    fctx.beginPath(); fctx.arc(d.x, d.y, 1.1 + Math.min(2.6, boost*2.2), 0, 6.2832); fctx.fill();
+  }
+  fctx.globalAlpha = 1;
+  for(const r of ripples){
+    const age = now-r.t;
+    fctx.globalAlpha = (1-age/2400)*0.22;
+    fctx.strokeStyle = '#ffb35c';
+    fctx.lineWidth = 1.6;
+    fctx.beginPath(); fctx.arc(r.x, r.y, age*0.28, 0, 6.2832); fctx.stroke();
+  }
+  fctx.globalAlpha = 1;
+}
+
+if(!reduced){
+  sizeEmbers(); sizeTrail(); sizeField();
+  addEventListener('resize', ()=>{ sizeEmbers(); sizeTrail(); sizeField(); });
+
+  addEventListener('pointermove', e=>{ fmouse.x = e.clientX; fmouse.y = e.clientY; fmouse.on = true; }, {passive:true});
+  addEventListener('pointerdown', e=>{
+    fmouse.x = e.clientX; fmouse.y = e.clientY; fmouse.on = true;
+    ripples.push({x:e.clientX, y:e.clientY, t:performance.now()});
+    if(ripples.length > 6) ripples.shift();
+  }, {passive:true});
+  addEventListener('pointerup', e=>{ if(e.pointerType !== 'mouse') fmouse.on = false; }, {passive:true});
+  addEventListener('pointercancel', e=>{ if(e.pointerType !== 'mouse') fmouse.on = false; }, {passive:true});
+  document.addEventListener('pointerleave', ()=>{ fmouse.on = false; });
+
+  if(finePointer){
+    addEventListener('pointermove', e=>{
+      mouse.x = e.clientX; mouse.y = e.clientY;
+      glowEl.style.opacity = '1';
+      trailPts.push({x:e.clientX, y:e.clientY, life:1});
+      if(trailPts.length > 64) trailPts.shift();
+    }, {passive:true});
+    document.addEventListener('pointerleave', ()=>{ glowEl.style.opacity = '0'; });
+  }
+
+  let fxRunning = true;
+  document.addEventListener('visibilitychange', ()=>{
+    fxRunning = !document.hidden;
+    if(fxRunning) requestAnimationFrame(fxTick);
+  });
+
+  function fxTick(){
+    if(!fxRunning) return;
+    drawField(performance.now());
+    ectx.clearRect(0,0,innerWidth,innerHeight);
+    for(const p of embers){
+      p.x += p.vx; p.y += p.vy; p.ph += p.ps;
+      if(p.y < -6){ p.y = innerHeight+6; p.x = Math.random()*innerWidth; }
+      if(p.x < -6) p.x = innerWidth+6; else if(p.x > innerWidth+6) p.x = -6;
+      const tw = p.a * (0.6 + 0.4*Math.sin(p.ph));
+      ectx.globalAlpha = tw;
+      ectx.fillStyle = '#f58025';
+      ectx.beginPath(); ectx.arc(p.x, p.y, p.r, 0, 6.2832); ectx.fill();
+    }
+    ectx.globalAlpha = 1;
+    glow.x += (mouse.x-glow.x)*0.12; glow.y += (mouse.y-glow.y)*0.12;
+    glowEl.style.transform = 'translate('+glow.x+'px,'+glow.y+'px)';
+    tctx.clearRect(0,0,innerWidth,innerHeight);
+    for(let i=0;i<trailPts.length;i++){
+      const pt = trailPts[i];
+      pt.life -= 0.028;
+      if(pt.life <= 0){ trailPts.splice(i--,1); continue; }
+      tctx.globalAlpha = pt.life*0.5;
+      tctx.fillStyle = '#ffb35c';
+      tctx.beginPath(); tctx.arc(pt.x, pt.y, 1.2+pt.life*2.4, 0, 6.2832); tctx.fill();
+    }
+    tctx.globalAlpha = 1;
+    requestAnimationFrame(fxTick);
+  }
+  requestAnimationFrame(fxTick);
+}
+
+/* ============ reveal on scroll ============ */
+const io = new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{threshold:.12});
+document.querySelectorAll('.reveal:not(.in)').forEach(el=>io.observe(el));
+/* nav border after scroll */
+const nav=document.getElementById('nav');
+addEventListener('scroll',()=>{nav.classList.toggle('scrolled',scrollY>24);},{passive:true});
+})();
+</script>
+
+</body>
+</html>
